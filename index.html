@@ -240,7 +240,7 @@
 
             try {
             // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ CORS-ОБХОД БЕЗ БЛОКИРОВОК (Исправлены полные ссылки)
-            const response = await fetch("https://api.allorigins.win/get?url" + encodeURIComponent("https://llm.api.cloud.yandex.net/foundationModels/v1/completion"), {
+            const response = await fetch("https://cors-anywhere.herokuapp.com/https://llm.api.cloud.yandex.net/foundationModels/v1/completion"), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
