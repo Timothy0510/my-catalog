@@ -3,96 +3,420 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог предприятий с генератором обращений</title>
+    <title>Интеллектуальный каталог предприятий</title>
     <style>
         :root {
-            --primary-color: #8b5cf6;
-            --dark-color: #222;
-            --light-color: #f4f4f9;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --accent-yellow: #f59e0b;
+            --accent-yellow-hover: #d97706;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --border-color: #e2e8f0;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--light-color); color: var(--dark-color); }
-        header { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        h1 { margin-top: 0; text-align: center; }
-        .form-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 15px; align-items: center; }
-        input, textarea, button { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font);
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Заголовок страницы */
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
         
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        /* Общие стили блоков */
+        header, .controls-container {
+            background-color: var(--card-bg);
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-bottom: 24px;
+        }
+
+        h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Форма добавления */
+        .form-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            background-color: #fff;
+            color: var(--text-main);
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 45px;
+        }
+
+        /* Кастомная кнопка выбора файла */
         .file-upload-btn {
-            display: inline-block;
-            padding: 10px;
-            background: #e2e8f0;
-            border: 1px dashed #a0aec0;
-            border-radius: 6px;
+            display: block;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--radius-md);
             text-align: center;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--text-muted);
+            box-sizing: border-box;
+            transition: var(--transition);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .file-upload-btn:hover { background: #cbd5e0; }
+        .file-upload-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: var(--text-main);
+        }
         #imgInp { display: none; }
 
-        button.save-btn { background-color: #ffcc00; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; height: 100%; }
-        button.save-btn:hover { background-color: #e6b800; }
-        
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .grid:empty::after {
-            content: "У вас пока нет добавленных предприятий. Используйте форму выше, чтобы добавить первую карточку! 🏢";
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #777;
-            font-size: 16px;
-            padding: 40px;
-            background: white;
-            border-radius: 12px;
-            border: 2px dashed #ccc;
+        /* Кнопки */
+        button {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; z-index: 10; }
-        .card-img { width: 100%; height: 180px; object-fit: cover; background-color: #ddd; }
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-title { margin: 0 0 10px 0; font-size: 20px; }
-        .card-info { font-size: 14px; color: #555; margin-bottom: 15px; flex-grow: 1; }
-        .card-contacts { font-size: 13px; font-style: italic; color: #777; border-top: 1px solid #eee; padding-top: 10px; padding-bottom: 10px;}
-        .ai-block { margin-top: 15px; background: #f9f6ff; border: 1px dashed var(--primary-color); padding: 10px; border-radius: 8px; }
-        .ai-block h4 { margin: 0 0 5px 0; color: var(--primary-color); font-size: 14px;}
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 90%; }
+        button.save-btn {
+            background-color: var(--accent-yellow);
+            color: #fff;
+            height: 46px;
+            width: 100%;
+        }
+        button.save-btn:hover { background-color: var(--accent-yellow-hover); }
+
+        /* Панель поиска и сортировки */
+        .controls-container {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 20px 28px;
+        }
+        .search-input { flex-grow: 1; min-width: 260px; }
+        .sort-select { width: auto; min-width: 200px; cursor: pointer; }
+
+        /* Сетка карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 28px;
+            margin-top: 32px;
+        }
+        .grid:empty::after {
+            content: "Предприятия не найдены. Измените параметры поиска или добавьте новую карточку! 🏢";
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 15px;
+            padding: 60px 20px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 2px dashed var(--border-color);
+            font-weight: 500;
+        }
+
+        /* Карточка компании */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: var(--transition);
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            border-color: #ddd;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 0;
+        }
+        .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-body {
+            padding: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            margin: 0 0 12px 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .card-info {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+        .card-contacts {
+            font-size: 13px;
+            color: var(--text-main);
+            background: #f8fafc;
+            padding: 12px var(--radius-md);
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Интеллектуальный ИИ-блок */
+        .ai-block {
+            background: #fcfaff;
+            border: 1px solid #ddd6fe;
+            padding: 16px;
+            border-radius: var(--radius-md);
+        }
+        .ai-block h4 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ai-block input {
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            border-color: #ddd6fe;
+        }
+        .ai-block button {
+            width: 100%;
+            font-size: 13px;
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+        }
+        .ai-block button:hover { background-color: var(--primary-hover); }
+
+        /* Модальное окно ИИ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            justify-content: center; align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: var(--radius-lg);
+            max-width: 540px;
+            width: 90%;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+        }
+        .modal-content h3 { font-size: 22px; letter-spacing: -0.5px; margin-bottom: 16px; }
+        
+        #aiResultText {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            color: #334155;
+        }
+        
+        .copy-btn { 
+            background-color: var(--success); 
+            color: white; 
+            width: 100%; 
+            margin-bottom: 10px; 
+            padding: 12px; 
+        }
+        .copy-btn:hover { 
+            background-color: var(--success-hover); 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🏢 Интеллектуальный каталог предприятий</h1>
-        <h3>Добавить новое предприятие:</h3>
-        <div class="form-container">
-            <input type="text" id="nameInp" placeholder="Название фирмы" required>
-            
-            <label class="file-upload-btn" id="fileLabel">
-                📁 Выбрать фото с ПК
-                <input type="file" id="imgInp" accept="image/*" onchange="updateFileName()">
-            </label>
+    <div class="container">
+        <h1>🏢 Интеллектуальный каталог</h1>
+        <div class="subtitle">Управляйте предприятиями и создавайте обращения с помощью встроенного ИИ YandexGPT</div>
 
-            <input type="text" id="contactInp" placeholder="Контакты (Телефон / Email)" required>
-            <textarea id="infoInp" placeholder="Описание деятельности" rows="1" required></textarea>
-            <button class="save-btn" onclick="addCard()">Сохранить карточку</button>
-        </div>
-    </header>
+        <header>
+            <h3>Добавить новое предприятие</h3>
+            <div class="form-container">
+                <div class="input-group">
+                    <label>Название компании</label>
+                    <input type="text" id="nameInp" placeholder="Например: Кофейня 'Бодрый Слон'" required>
+                </div>
+                
+                <div class="input-group">
+                    <label>Изображение обложки</label>
+                    <label class="file-upload-btn" id="fileLabel">
+                        📁 Выбрать фото с ПК
+                        <input type="file" id="imgInp" accept="image/*" onchange="updateFileName()">
+                    </label>
+                </div>
 
-    <main class="grid" id="cardsGrid"></main>
+                <div class="input-group">
+                    <label>Контактные данные</label>
+                    <input type="text" id="contactInp" placeholder="Телефон, адрес или email" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Описание деятельности</label>
+                    <textarea id="infoInp" placeholder="Чем занимается предприятие..." rows="1" required></textarea>
+                </div>
+
+                <button class="save-btn" onclick="addCard()">Сохранить компанию</button>
+            </div>
+        </header>
+
+        <section class="controls-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Быстрый поиск по названию или описанию..." oninput="renderCards()">
+            <select id="sortSelect" class="sort-select" onchange="renderCards()">
+                <option value="newest">Сначала новые</option>
+                <option value="oldest">Сначала старые</option>
+                <option value="alpha">По алфавиту (А-Я)</option>
+                <option value="alphaDesc">По алфавиту (Я-А)</option>
+            </select>
+        </section>
+
+        <main class="grid" id="cardsGrid"></main>
+    </div>
 
     <div class="modal" id="aiModal">
         <div class="modal-content">
-            <h3>🤖 Сгенерированное обращение:</h3>
-            <p id="aiResultText" style="white-space: pre-wrap; line-height: 1.5; background: #f5f5f5; padding: 10px; border-radius: 6px; max-height: 300px; overflow-y: auto;"></p>
-            <button onclick="closeModal()" style="width: 100%; background-color: var(--primary-color); color: white;">Закрыть</button>
+            <h3>✨ Нейросеть составила обращение</h3>
+            <p id="aiResultText"></p>
+            <button class="copy-btn" onclick="copyText()">📋 Скопировать текст</button>
+            <button onclick="closeModal()" style="width: 100%; background-color: #94a3b8; color: white; padding: 10px; border-radius: 6px; border: none; cursor: pointer;">Закрыть</button>
         </div>
     </div>
 
     <script>
-        // Рабочие ключи авторизации Яндекс Облака
+        // Данные авторизации Яндекс Облака
         const YANDEX_FOLDER_ID = 'b1gkmc544ntlq16dptm0'; 
         const YANDEX_API_KEY = 'AQVNzTJxpZmT3yVd1ErAw7DURVIo6hu_u9pYKOOw';
 
@@ -100,22 +424,21 @@
         
         let enterprises = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-        // Функция для отслеживания выбора файла (ИСПРАВЛЕНО)
-        function updateFileName() {
-            const fileInput = document.getElementById('imgInp');
-            const label = document.getElementById('fileLabel');
-            if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                label.innerText = "✔️ Фото выбрано";
-            } else {
-                label.innerText = "📁 Выбрать фото с ПК";
-            }
-        }
-
         function saveToStorage() { 
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(enterprises)); 
             } catch(e) {
-                alert("Ошибка! Хранилище браузера переполнено.");
+                alert("Ошибка! Хранилище браузера переполнено. Картинка слишком большая.");
+            }
+        }
+
+        function updateFileName() {
+            const fileInput = document.getElementById('imgInp');
+            const label = document.getElementById('fileLabel');
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                label.innerText = "✔️ Фото успешно выбрано";
+            } else {
+                label.innerText = "📁 Выбрать фото с ПК";
             }
         }
 
@@ -123,9 +446,27 @@
             const grid = document.getElementById('cardsGrid');
             grid.innerHTML = '';
             
-            if (!enterprises || enterprises.length === 0) return;
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const sortMethod = document.getElementById('sortSelect').value;
 
-            enterprises.forEach(company => {
+            let filtered = enterprises.filter(company => {
+                return company.name.toLowerCase().includes(searchQuery) || 
+                       company.info.toLowerCase().includes(searchQuery);
+            });
+
+            if (sortMethod === 'newest') {
+                filtered.sort((a, b) => b.id - a.id);
+            } else if (sortMethod === 'oldest') {
+                filtered.sort((a, b) => a.id - b.id);
+            } else if (sortMethod === 'alpha') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else if (sortMethod === 'alphaDesc') {
+                filtered.sort((a, b) => b.name.localeCompare(a.name));
+            }
+
+            if (filtered.length === 0) return;
+
+            filtered.forEach(company => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
@@ -134,11 +475,11 @@
                     <div class="card-body">
                         <h2 class="card-title">${company.name}</h2>
                         <p class="card-info">${company.info}</p>
-                        <div class="card-contacts"><strong>Контакты:</strong> ${company.contacts}</div>
+                        <div class="card-contacts">📍 <strong>Контакты:</strong> ${company.contacts}</div>
                         <div class="ai-block">
-                            <h4>✨ Составить обращение через YandexGPT</h4>
-                            <input type="text" id="prompt-${company.id}" placeholder="Суть (например: хочу заказать банкет на 20 человек)" style="width: calc(100% - 22px); margin-bottom: 8px;">
-                            <button onclick="generateAIRequest(${company.id})" style="width: 100%; font-size: 13px; background: #8b5cf6; color: white;">Сгенерировать текст</button>
+                            <h4>🤖 Написать ИИ-обращение</h4>
+                            <input type="text" id="prompt-${company.id}" placeholder="Суть (например: забронировать стол на вечер)">
+                            <button onclick="generateAIRequest(${company.id})">Сгенерировать обращение</button>
                         </div>
                     </div>`;
                 grid.appendChild(card);
@@ -156,20 +497,11 @@
                     const MAX_WIDTH = 600;
                     let width = img.width;
                     let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    callback(compressedBase64);
+                    callback(canvas.toDataURL('image/jpeg', 0.7));
                 };
             };
         }
@@ -181,7 +513,7 @@
             const info = document.getElementById('infoInp').value;
 
             if (!name || !contacts || !info) { 
-                alert("Заполните все обязательные текстовые поля (Название, Контакты, Описание)!"); 
+                alert("Пожалуйста, заполните все обязательные поля!"); 
                 return; 
             }
 
@@ -195,32 +527,23 @@
         }
 
         function executeAdd(name, imgData, contacts, info) {
-            enterprises.push({ 
-                id: Date.now(), 
-                name: name, 
-                img: imgData, 
-                info: info, 
-                contacts: contacts 
-            });
-            
+            enterprises.push({ id: Date.now(), name: name, img: imgData, info: info, contacts: contacts });
             saveToStorage();
             renderCards();
-
-            // Исправленная очистка полей формы (убрана ошибка 'value' of null)
             document.getElementById('nameInp').value = '';
             document.getElementById('contactInp').value = '';
             document.getElementById('infoInp').value = '';
-            
             const fileInput = document.getElementById('imgInp');
-            if (fileInput) fileInput.value = ''; // Безопасный сброс файла
-            
+            if (fileInput) fileInput.value = '';
             document.getElementById('fileLabel').innerText = '📁 Выбрать фото с ПК';
         }
 
         function deleteCard(id) { 
-            enterprises = enterprises.filter(company => company.id !== id); 
-            saveToStorage(); 
-            renderCards(); 
+            if(confirm("Вы действительно хотите удалить это предприятие из каталога?")) {
+                enterprises = enterprises.filter(company => company.id !== id); 
+                saveToStorage(); 
+                renderCards(); 
+            }
         }
 
         async function generateAIRequest(id) {
@@ -228,23 +551,18 @@
             if (!company) return;
             
             const userPrompt = document.getElementById(`prompt-${id}`).value;
-
-            if (!userPrompt) {
-                alert("Пожалуйста, напишите кратко суть обращения.");
-                return;
-            }
+            if (!userPrompt) { alert("Пожалуйста, напишите кратко суть обращения."); return; }
 
             const resultTextElement = document.getElementById('aiResultText');
             document.getElementById('aiModal').style.display = 'flex';
             resultTextElement.innerText = "YandexGPT составляет текст обращения... ⏳";
 
             try {
-            // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ CORS-ОБХОД БЕЗ БЛОКИРОВОК
-            const response = await fetch("https://cors-anywhere.herokuapp.com/https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Api-Key ${YANDEX_API_KEY}`,
-                    "x-folder-id": YANDEX_FOLDER_ID,
+                const response = await fetch("https://cors-anywhere.herokuapp.com/https://llm.api.cloud.yandex.net/foundationModels/v1/completion", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Api-Key ${YANDEX_API_KEY}`,
+                        "x-folder-id": YANDEX_FOLDER_ID,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
@@ -269,25 +587,32 @@
 
             const data = await response.json();
 
+            // Безопасный разбор ответа с индексом [0]
             if (data.result && data.result.alternatives && data.result.alternatives[0]) {
                 resultTextElement.innerText = data.result.alternatives[0].message.text;
             } else if (data.message) {
                 resultTextElement.innerText = `Ошибка от Яндекса: ${data.message}`;
             } else {
-                resultTextElement.innerText = "Не удалось расшифровать ответ ИИ.";
+                resultTextElement.innerText = "Не удалось расшифровать ответ ИИ. Проверьте статус биллинга.";
             }
-        } 
-        catch (error) {
-            resultTextElement.innerText = "Ошибка сети при генерации обращения.";
+        } catch (error) {
+            resultTextElement.innerText = "Браузер заблокировал запрос. Убедитесь, что вы активировали доступ на странице ://herokuapp.com.";
         }
     }
 
-        function closeModal() { 
-            document.getElementById('aiModal').style.display = 'none'; 
-        }
+    function copyText() {
+        const text = document.getElementById('aiResultText').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Текст обращения успешно скопирован в буфер обмена! 📋");
+        });
+    }
 
-        // Запуск отображения сохраненных данных
-        renderCards();
+    function closeModal() { 
+        document.getElementById('aiModal').style.display = 'none'; 
+    }
+
+    // Первичный запуск отображения сохраненных данных
+    renderCards();
 </script>
 </body>
 </html>
