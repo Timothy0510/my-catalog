@@ -493,38 +493,6 @@
             });
         }
 
-        function compressImage(fileInput, callback) {
-            // Исправлено: берем первый файл из переданного инпута
-            const file = fileInput.files[0];
-            if (!file) return callback('');
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function (event) {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = function () {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600;
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                    callback(compressedBase64);
-                };
-            };
-        }
-
         function addCard() {
             const name = document.getElementById('nameInp').value;
             const fileInput = document.getElementById('imgInp');
@@ -536,21 +504,34 @@
                 return; 
             }
 
-            // Исправлено: передаем весь элемент инпута в функцию сжатия
-            if (fileInput && fileInput.files && fileInput.files.length > 0) {
-                compressImage(fileInput, function(compressedImgData) {
-                    executeAdd(name, compressedImgData, contacts, info);
-                });
+            // Исправлено: прямое и надежное чтение файла через FileReader без canvas-ошибок
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function (event) {
+                    // event.target.result — это уже готовая, чистая строка картинки data:image/...
+                    executeAdd(name, event.target.result, contacts, info);
+                };
+                reader.readAsDataURL(file);
             } else {
                 executeAdd(name, '', contacts, info);
             }
         }
 
         function executeAdd(name, imgData, contacts, info) {
-            enterprises.push({ id: Date.now(), name: name, img: imgData, info: info, contacts: contacts });
+            enterprises.push({ 
+                id: Date.now(), 
+                name: name, 
+                img: imgData, 
+                info: info, 
+                contacts: contacts 
+            });
+            
             saveToStorage();
             renderCards();
             
+            // Очистка формы
             document.getElementById('nameInp').value = '';
             document.getElementById('contactInp').value = '';
             document.getElementById('infoInp').value = '';
