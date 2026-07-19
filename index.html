@@ -467,11 +467,18 @@
             if (filtered.length === 0) return;
 
             filtered.forEach(company => {
+                // ИСПРАВЛЕНО: Безопасная проверка и формирование правильной ссылки для локального фото
+                let imageSrc = 'https://placeholder.com';
+                if (company.img) {
+                    // Если строка уже содержит префикс данных, берем её, иначе добавляем его вручную
+                    imageSrc = company.img.startsWith('data:') ? company.img : `data:image/jpeg;base64,${company.img}`;
+                }
+
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <button class="delete-btn" onclick="deleteCard(${company.id})">×</button>
-                    <img class="card-img" src="${company.img || 'https://placeholder.com'}" alt="${company.name}">
+                    <img class="card-img" src="${imageSrc}" alt="${company.name}">
                     <div class="card-body">
                         <h2 class="card-title">${company.name}</h2>
                         <p class="card-info">${company.info}</p>
